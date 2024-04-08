@@ -3,12 +3,14 @@ from langchain_community.document_loaders.pdf import PyPDFLoader
 from langchain.indexes import VectorstoreIndexCreator
 from langchain_openai import ChatOpenAI
 import  time
+from PIL import Image
 
 from dotenv import load_dotenv
 load_dotenv()
 
 # Front end
-st.set_page_config(page_title="Asknotes.ai", layout="wide", page_icon='📝', initial_sidebar_state="auto")
+img = Image.open('assests/onlylogo.png')
+st.set_page_config(page_title="Asknotes.ai", layout="wide", page_icon=img, initial_sidebar_state="auto")
 st.title("📝AskNotes.ai")
 
 # File Uploader
@@ -40,7 +42,7 @@ if pdf:
         # AI Response
         with st.chat_message("ai"):
 
-            loader = PyPDFLoader('D:\VSCodePrograms\AskNotes\Data\Bitcoin.pdf')
+            loader = PyPDFLoader('D:\Project\Asknotes\Data\Bitcoin.pdf')
             index = VectorstoreIndexCreator().from_loaders([loader])
             llm = ChatOpenAI(model='gpt-4', verbose=True, temperature=0.6)
             response = index.query(question=prompt)
