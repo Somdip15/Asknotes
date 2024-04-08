@@ -2,39 +2,33 @@ import streamlit as st
 from langchain_community.document_loaders.pdf import PyPDFLoader
 from langchain.indexes import VectorstoreIndexCreator
 from langchain_openai import ChatOpenAI
-import os, shutil
+import time
 
 from dotenv import load_dotenv
 load_dotenv()
 
 # Front end
-st.title("AskNotes.ai")
+st.set_page_config(page_title="Asknotes.ai", layout="wide", page_icon=':pencil:', initial_sidebar_state="auto")
+st.title(":pencilAskNotes.ai")
 
 # File Uploader
-pdfs = st.file_uploader(label="Upload PDF", accept_multiple_files=True, type='.pdf')
+pdf = st.file_uploader(label="Upload your PDF", type='.pdf')
 
-# Create new directory
-newpath = 'D:\VSCodePrograms\AskNotes\Asknotes\DataFiles'
-if not os.path.exists(newpath):
-    os.makedirs(newpath)
+if pdf:
+    #Chat interface
+    if "message" not in st.session_state: # Initialize chat history
+        st.session_state["message"] = []
 
-# Copy PDFs to new directory
-for pdf in pdfs:
-    try:
-        shutil.copy(src=os.path.abspath(pdf.name), dst=f'D:\VSCodePrograms\AskNotes\Asknotes\DataFiles\{pdf.name}')
-    except:
-        st.write(f'{pdf.name} not found')
-        break
-    
-# Prompt
-prompt = st.text_input("Enter your prompt")
+    with st.chat_message(name="ai"): # Intro message
+        st.write("Hi! I'm AskNotes.ai. Ask me anything about the uploaded PDF!")
 
-if prompt:
-    loader = PyPDFLoader(newpath)
-    index = VectorstoreIndexCreator().from_loaders([loader]) #Vectorizing
+    for message in st.session_state.message: # Display msg from chat history
+        with st.chat_message(message["role"]):
+            st.markdown(message["content"])
 
-    llm = ChatOpenAI(model='gpt-4', verbose=True, temperature=0.6)
-
-    response = index.query(prompt)
-    st.write(response)
-    print(response)
+    # User Prompt
+    prompt = st.text_input("Enter your prompt")
+    if prompt:
+        with st.chat_message("user"): # Displays user message
+            st.markdown(prompt)
+        st.session_state.message.append({"role": "user", "content": prompt}) # Adds to chat history
